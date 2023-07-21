@@ -1,66 +1,58 @@
 import requests
+import matplotlib.pyplot as plt
 
-def get_current_weather():
+def get_weather_data_with_plot(coordinates, plot_enabled=True):
     base_url = "https://api.open-meteo.com/v1/forecast"
-    location = "Denver,CO"  # Replace this with the desired location, e.g., "Denver,CO" or coordinates "lat,lon"
 
-    # Add query parameters for the location and current forecast
+    # Add query parameters for the coordinates and desired weather data
     params = {
-        "hourly": "temperature_2m,weathercode",
-        "current_weather": "true",
-        "latitude": "",
-        "longitude": "",
+        "hourly": "temperature_2m,relativehumidity_2m",
+        "latitude": f"{coordinates[0]}",
+        "longitude": f"{coordinates[1]}",
     }
-
-    # Make sure to set the latitude and longitude for the desired location
-    # You can also use a geocoding API to convert the location name to coordinates
-    # Example: "Denver,CO" -> Latitude: 39.7392, Longitude: -104.9903
 
     # Make the API request
     response = requests.get(base_url, params=params)
 
     if response.status_code != 200:
-        raise Exception(f"Failed to fetch current weather data. Status code: {response.status_code}")
+        raise Exception(f"Failed to fetch weather data. Status code: {response.status_code}")
 
-    current_weather_data = response.json()
+    weather_data = response.json()
 
-    # Extract the current weather conditions
-    current_temperature = current_weather_data["hourly"]["temperature_2m"]["values"][0]
-    weather_code = current_weather_data["hourly"]["weathercode"]["values"][0]
-    current_conditions = get_weather_description(weather_code)
+    # Extract temperature and relative humidity
+    temperatures = weather_data["hourly"]["temperature_2m"]["values"]
+    humidity = weather_data["hourly"]["relative_humidity_2m"]["values"]
 
-    return current_temperature, current_conditions
+    if plot_enabled:
+        plot_weather_data(temperatures, humidity)
 
-def get_weather_description(weather_code):
-    # Map the weather codes to human-readable descriptions
-    weather_codes = {
-        0: "Unknown",
-        1: "Clear sky",
-        2: "Few clouds",
-        3: "Scattered clouds",
-        4: "Broken clouds",
-        5: "Overcast",
-        10: "Fog",
-        21: "Mist",
-        22: "Haze",
-        23: "Smoke",
-        24: "Dust or sand",
-        30: "Drizzle",
-        31: "Rain showers",
-        32: "Rain",
-        33: "Rain and snow",
-        40: "Snow showers",
-        41: "Snow",
-        42: "Snow and rain",
-        51: "Thunderstorms",
-    }
+    return temperatures, humidity
 
-    return weather_codes.get(weather_code, "Unknown")
+def plot_weather_data(temperatures, humidity):
+    hours = list(range(len(temperatures)))
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(hours, temperatures, label="Temperature (°C)", color="red")
+    plt.plot(hours, humidity, label="Relative Humidity (%)", color="blue")
+
+    plt.title("Temperature and Relative Humidity")
+    plt.xlabel("Hour")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.grid(True)
+    plt.xticks(hours[::3])  # Show only every 3rd hour on the x-axis
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == "__main__":
     try:
-        current_temp, current_conditions = get_current_weather()
-        print(f"Current Temperature: {current_temp}°C")
-        print(f"Current Conditions: {current_conditions}")
+        coordinates = (39.7392, -104.9847)
+        plot_weather = True  # Set to False to disable plotting
+
+        temperatures, humidity = get_weather_data_with_plot(coordinates, plot_enabled=plot_weather)
+
+        # If you don't want to plot but still need the data, use:
+        # temperatures, humidity = get_weather_data_with_plot(coordinates, plot_enabled=False)
+
     except Exception as e:
         print(f"Error: {e}")
