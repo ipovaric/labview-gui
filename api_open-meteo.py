@@ -20,8 +20,8 @@ def get_weather_data_with_plot(coordinates, plot_enabled=True):
     weather_data = response.json()
 
     # Extract temperature and relative humidity
-    temperatures = weather_data["hourly"]["temperature_2m"]["values"]
-    humidity = weather_data["hourly"]["relative_humidity_2m"]["values"]
+    temperatures = weather_data["hourly"]["temperature_2m"]
+    humidity = weather_data["hourly"]["relativehumidity_2m"]
 
     if plot_enabled:
         plot_weather_data(temperatures, humidity)
