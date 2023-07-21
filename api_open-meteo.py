@@ -1,5 +1,6 @@
 import requests
 import matplotlib.pyplot as plt
+import pandas as pd
 
 def get_weather_data_with_plot(coordinates, plot_enabled=True):
     base_url = "https://api.open-meteo.com/v1/forecast"
@@ -20,27 +21,31 @@ def get_weather_data_with_plot(coordinates, plot_enabled=True):
     weather_data = response.json()
 
     # Extract temperature and relative humidity
+    timestamps = weather_data["hourly"]["time"]
     temperatures = weather_data["hourly"]["temperature_2m"]
     humidity = weather_data["hourly"]["relativehumidity_2m"]
 
+    timestamps = [pd.to_datetime(ts) for ts in timestamps]
+
     if plot_enabled:
-        plot_weather_data(temperatures, humidity)
+        plot_weather_data(timestamps, temperatures, humidity)
 
     return temperatures, humidity
 
-def plot_weather_data(temperatures, humidity):
-    hours = list(range(len(temperatures)))
+def plot_weather_data(timestamps, temperatures, humidity):
+    #hours = list(range(len(temperatures)))
+
 
     plt.figure(figsize=(10, 6))
-    plt.plot(hours, temperatures, label="Temperature (°C)", color="red")
-    plt.plot(hours, humidity, label="Relative Humidity (%)", color="blue")
+    plt.plot(timestamps, temperatures, label="Temperature (°C)", color="red")
+    plt.plot(timestamps, humidity, label="Relative Humidity (%)", color="blue")
 
     plt.title("Temperature and Relative Humidity")
-    plt.xlabel("Hour")
+    plt.xlabel("Time")
     plt.ylabel("Value")
     plt.legend()
     plt.grid(True)
-    plt.xticks(hours[::3])  # Show only every 3rd hour on the x-axis
+    #plt.xticks(hours[::3])  # Show only every 3rd hour on the x-axis
     plt.tight_layout()
     plt.show()
 
