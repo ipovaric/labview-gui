@@ -1,6 +1,7 @@
 import requests
 import matplotlib.pyplot as plt
 import pandas as pd
+import win32com.client as win32
 
 def get_weather_data_with_plot(coordinates, plot_enabled=True):
     base_url = "https://api.open-meteo.com/v1/forecast"
@@ -30,7 +31,10 @@ def get_weather_data_with_plot(coordinates, plot_enabled=True):
     if plot_enabled:
         plot_weather_data(timestamps, temperatures, humidity)
 
-    return temperatures, humidity
+    shared_data = [timestamps,temperatures,humidity]
+    # push_data_to_shared_variable(shared_data)
+    
+    return timestamps, temperatures, humidity
 
 def plot_weather_data(timestamps, temperatures, humidity):
     #hours = list(range(len(temperatures)))
@@ -48,6 +52,18 @@ def plot_weather_data(timestamps, temperatures, humidity):
     #plt.xticks(hours[::3])  # Show only every 3rd hour on the x-axis
     plt.tight_layout()
     plt.show()
+
+
+# def push_data_to_shared_variable():
+#     # Connect to the LabVIEW application instance
+#     labview = win32.Dispatch("LabVIEW.Application")
+    
+#     # Get the shared variable reference
+#     shared_variable = labview.GetSharedVariable("Weather")
+    
+#     # Write data to the shared variable
+#     shared_variable.Value = "Sunny"
+
 
 if __name__ == "__main__":
     try:
